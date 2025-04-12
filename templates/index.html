@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthBot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Adding modern icon library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Add animate.css for more animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <!-- Add Showdown for Markdown parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="health-header">
+      <div class="logo">
+        <h1><i class="fas fa-heartbeat"></i> HealthBot</h1>
+      </div>
+      <div class="header-actions">
+        <button id="profile-toggle"><i class="fas fa-user-circle"></i> Patient Profile</button>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <main class="chat-container">
+        <div class="welcome-card animate__animated animate__fadeIn">
+          <div class="welcome-icon"><i class="fas fa-robot"></i></div>
+          <h2>Welcome to HealthBot!</h2>
+          <p>I can help with medical queries, suggest specialists, provide health tips, and even schedule consultations for you.</p>
+          <div class="welcome-pulse-circle"></div>
+        </div>
+
+        <div id="chat-box"></div>
+        
+        <div class="typing-indicator" id="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        
+        <form id="chat-form" autocomplete="off">
+          <input type="text" id="user-input" placeholder="Describe your symptoms or ask for health tips..." required />
+          <button type="submit" id="send-button"><i class="fas fa-paper-plane"></i></button>
+        </form>
+        
+        <div class="quick-actions" id="quick-actions">
+          <button class="quick-action-btn" data-message="Give me some general health tips">Health Tips</button>
+          <button class="quick-action-btn" data-message="What are the symptoms of diabetes?">About Diabetes</button>
+          <button class="quick-action-btn" data-message="I want to book a consultation">Book Consultation</button>
+          <button class="quick-action-btn" data-message="My consultations">My Appointments</button>
+          <button class="quick-action-btn" data-message="Tell me about migraine">Migraine Info</button>
+          <button class="quick-action-btn" data-message="I need a skin specialist">Skin Issues</button>
+        </div>
+      </main>
+
+      <div class="profile-sidebar" id="profile-sidebar">
+        <div class="tabs">
+          <div class="tab active" data-tab="profile">Profile</div>
+          <div class="tab" data-tab="consultations">Consultations</div>
+          <div class="tab" data-tab="health-info">Health Info</div>
+        </div>
+        
+        <div id="profile-tab" class="tab-content active">
+          <h2><i class="fas fa-user-md"></i> Patient Profile</h2>
+          <p>Please fill in your details to help us better understand your medical needs.</p>
+          
+          <div id="profile-form-container">
+            <form id="profile-form" class="profile-form">
+              <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="name" placeholder="Full Name" required>
+              </div>
+              
+              <div class="input-group">
+                <i class="fas fa-birthday-cake input-icon"></i>
+                <input type="number" id="age" placeholder="Age" min="1" max="120" required>
+              </div>
+              
+              <div class="input-group">
+                <i class="fas fa-venus-mars input-icon"></i>
+                <select id="gender" required>
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div class="input-group">
+                <i class="fas fa-notes-medical input-icon"></i>
+                <input type="text" id="medical-history" placeholder="Medical History (e.g., Diabetes)">
+              </div>
+              
+              <div class="input-group">
+                <i class="fas fa-allergies input-icon"></i>
+                <input type="text" id="allergies" placeholder="Allergies (if any)">
+              </div>
+              
+              <div class="input-group">
+                <i class="fas fa-pills input-icon"></i>
+                <input type="text" id="current-medications" placeholder="Current Medications">
+              </div>
+              
+              <button type="submit"><i class="fas fa-save"></i> Save Profile</button>
+            </form>
+          </div>
+          
+          <div id="profile-summary" class="profile-summary" style="display: none;">
+            <div class="profile-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <h3>Your Profile</h3>
+            
+            <div class="profile-field">
+              <strong><i class="fas fa-user"></i> Name:</strong> 
+              <span id="summary-name"></span>
+            </div>
+            
+            <div class="profile-field">
+              <strong><i class="fas fa-birthday-cake"></i> Age:</strong> 
+              <span id="summary-age"></span>
+            </div>
+            
+            <div class="profile-field">
+              <strong><i class="fas fa-venus-mars"></i> Gender:</strong> 
+              <span id="summary-gender"></span>
+            </div>
+            
+            <div class="profile-field">
+              <strong><i class="fas fa-notes-medical"></i> Medical History:</strong> 
+              <span id="summary-medical-history"></span>
+            </div>
+            
+            <div class="profile-field">
+              <strong><i class="fas fa-allergies"></i> Allergies:</strong> 
+              <span id="summary-allergies"></span>
+            </div>
+            
+            <div class="profile-field">
+              <strong><i class="fas fa-pills"></i> Current Medications:</strong> 
+              <span id="summary-current-medications"></span>
+            </div>
+            
+            <button id="edit-profile"><i class="fas fa-edit"></i> Edit Profile</button>
+          </div>
+        </div>
+        
+        <div id="consultations-tab" class="tab-content">
+          <h2><i class="fas fa-calendar-check"></i> Your Consultations</h2>
+          <p>Manage your scheduled medical appointments here.</p>
+          
+          <div id="consultations-container" class="consultation-list">
+            <!-- Consultations will be loaded here -->
+            <div class="empty-consultations" id="empty-consultations">
+              <p>You don't have any scheduled consultations.</p>
+            </div>
+          </div>
+          
+          <button class="new-consultation-btn" id="new-consultation-btn">
+            <i class="fas fa-plus-circle"></i> Schedule New Consultation
+          </button>
+
+          <div id="booking-form" class="profile-form" style="display: none; margin-top: 20px;">
+            <h3><i class="fas fa-calendar-plus"></i> Book Appointment</h3>
+            
+            <div class="input-group">
+              <i class="fas fa-user-md input-icon"></i>
+              <select id="specialist-type" required>
+                <option value="" disabled selected>Select Specialist</option>
+                <option value="General Physician">General Physician</option>
+                <option value="Cardiologist">Cardiologist</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Neurologist">Neurologist</option>
+                <option value="Endocrinologist">Endocrinologist</option>
+                <option value="Pulmonologist">Pulmonologist</option>
+                <option value="Gastroenterologist">Gastroenterologist</option>
+                <option value="Ophthalmologist">Ophthalmologist</option>
+                <option value="Rheumatologist">Rheumatologist</option>
+                <option value="Psychiatrist">Psychiatrist</option>
+                <option value="ENT Specialist">ENT Specialist</option>
+                <option value="Orthopedic Specialist">Orthopedic Specialist</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <i class="fas fa-calendar-day input-icon"></i>
+              <input type="date" id="appointment-date" required>
+            </div>
+            
+            <div class="input-group">
+              <i class="fas fa-clock input-icon"></i>
+              <select id="appointment-time" required>
+                <option value="" disabled selected>Select Time</option>
+                <option value="09:00 AM">09:00 AM</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="11:00 AM">11:00 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="02:00 PM">02:00 PM</option>
+                <option value="03:00 PM">03:00 PM</option>
+                <option value="04:00 PM">04:00 PM</option>
+                <option value="05:00 PM">05:00 PM</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <i class="fas fa-comment-medical input-icon"></i>
+              <textarea id="appointment-reason" placeholder="Reason for visit (optional)" rows="3"></textarea>
+            </div>
+            
+            <div class="booking-buttons">
+              <button type="button" id="confirm-booking" class="confirm-btn"><i class="fas fa-check"></i> Confirm Booking</button>
+              <button type="button" id="cancel-booking" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="health-info-tab" class="tab-content">
+          <h2><i class="fas fa-heartbeat"></i> Health Information</h2>
+          <p>Essential health resources and tips for a healthy lifestyle.</p>
+          
+          <div class="tips-card">
+            <h3><i class="fas fa-star"></i> General Health Tips</h3>
+            <ul>
+              <li>Stay hydrated by drinking at least 8 glasses of water daily</li>
+              <li>Aim for 7-8 hours of quality sleep each night</li>
+              <li>Exercise for at least 30 minutes most days of the week</li>
+              <li>Maintain a balanced diet rich in fruits and vegetables</li>
+              <li>Practice stress management techniques like meditation</li>
+            </ul>
+          </div>
+          
+          <div class="disease-card">
+            <h3><i class="fas fa-info-circle"></i> Common Diseases</h3>
+            <p>Ask the HealthBot about:</p>
+            <div class="disease-buttons">
+              <button class="disease-btn" data-disease="diabetes">Diabetes</button>
+              <button class="disease-btn" data-disease="hypertension">Hypertension</button>
+              <button class="disease-btn" data-disease="asthma">Asthma</button>
+              <button class="disease-btn" data-disease="arthritis">Arthritis</button>
+              <button class="disease-btn" data-disease="depression">Depression</button>
+              <button class="disease-btn" data-disease="migraine">Migraine</button>
+              <button class="disease-btn" data-disease="eczema">Eczema</button>
+              <button class="disease-btn" data-disease="gerd">GERD</button>
+              <button class="disease-btn" data-disease="thyroid_disorders">Thyroid</button>
+              <button class="disease-btn" data-disease="glaucoma">Glaucoma</button>
+              <button class="disease-btn" data-disease="osteoporosis">Osteoporosis</button>
+              <button class="disease-btn" data-disease="fibromyalgia">Fibromyalgia</button>
+              <button class="disease-btn" data-disease="multiple_sclerosis">MS</button>
+              <button class="disease-btn" data-disease="celiac_disease">Celiac</button>
+            </div>
+          </div>
+          
+          <div class="emergency-alert">
+            <h3><i class="fas fa-exclamation-triangle"></i> Emergency Guidance</h3>
+            <p>For medical emergencies like severe chest pain, difficulty breathing, or stroke symptoms, call emergency services immediately.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Markdown converter
+    const converter = new showdown.Converter({
+      strikethrough: true,
+      tables: true,
+      tasklists: true,
+      smoothLivePreview: true,
+      smartIndentationFix: true
+    });
+    
+    // DOM Elements
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const chatBox = document.getElementById('chat-box');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const profileToggle = document.getElementById('profile-toggle');
+    const profileSidebar = document.getElementById('profile-sidebar');
+    const profileForm = document.getElementById('profile-form');
+    const profileFormContainer = document.getElementById('profile-form-container');
+    const profileSummary = document.getElementById('profile-summary');
+    const editProfileBtn = document.getElementById('edit-profile');
+    const quickActions = document.getElementById('quick-actions');
+    const newConsultationBtn = document.getElementById('new-consultation-btn');
+    const consultationsContainer = document.getElementById('consultations-container');
+    const emptyConsultations = document.getElementById('empty-consultations');
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const diseaseButtons = document.querySelectorAll('.disease-btn');
+    const bookingForm = document.getElementById('booking-form');
+    const confirmBookingBtn = document.getElementById('confirm-booking');
+    const cancelBookingBtn = document.getElementById('cancel-booking');
+    
+    // Set minimum date for appointment booking to today
+    const appointmentDate = document.getElementById('appointment-date');
+    if (appointmentDate) {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      const minDate = yyyy + '-' + mm + '-' + dd;
+      appointmentDate.min = minDate;
+    }
+    
+    // Tab switching
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.getAttribute('data-tab');
+        
+        // Update active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show active content
+        tabContents.forEach(content => content.classList.remove('active'));
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+    
+    // Disease buttons
+    diseaseButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const disease = button.getAttribute('data-disease');
+        sendMessage(`Tell me about ${disease}`);
+        profileSidebar.classList.remove('active');
+      });
+    });
+    
+    // Quick action buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const message = btn.getAttribute('data-message');
+        sendMessage(message);
+      });
+    });
+    
+    // New consultation button
+    newConsultationBtn.addEventListener('click', () => {
+      // Toggle booking form
+      if (bookingForm.style.display === 'none') {
+        bookingForm.style.display = 'block';
+        bookingForm.classList.add('animate__animated', 'animate__fadeIn');
+      } else {
+        bookingForm.style.display = 'none';
+      }
+    });
+    
+    // Confirm booking button
+    confirmBookingBtn.addEventListener('click', () => {
+      const specialistType = document.getElementById('specialist-type').value;
+      const date = document.getElementById('appointment-date').value;
+      const time = document.getElementById('appointment-time').value;
+      const reason = document.getElementById('appointment-reason').value || '';
+      
+      if (!specialistType || !date || !time) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+      
+      const formattedDate = new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      // Send the booking details to backend via chat
+      const bookingMessage = `I want to book a consultation with a ${specialistType} on ${formattedDate} at ${time}${reason ? ' for ' + reason : ''}`;
+      sendMessage(bookingMessage);
+      
+      // Hide the booking form
+      bookingForm.style.display = 'none';
+      
+      // Hide the sidebar
+      profileSidebar.classList.remove('active');
+    });
+    
+    // Cancel booking button
+    cancelBookingBtn.addEventListener('click', () => {
+      bookingForm.style.display = 'none';
+    });
+    
+    // Profile toggle with animation
+    profileToggle.addEventListener('click', () => {
+      profileSidebar.classList.toggle('active');
+      
+      // Add animation class for profile elements
+      if (profileSidebar.classList.contains('active')) {
+        loadConsultations();
+        
+        setTimeout(() => {
+          document.querySelectorAll('.profile-field').forEach((field, index) => {
+            field.style.animationDelay = `${index * 0.1}s`;
+            field.classList.add('animate__animated', 'animate__fadeInRight');
+          });
+        }, 300);
+      }
+    });
+    
+    // Save profile with animation
+    profileForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Get form values
+      const profileData = {
+        name: document.getElementById('name').value,
+        age: document.getElementById('age').value,
+        gender: document.getElementById('gender').value,
+        medicalHistory: document.getElementById('medical-history').value || 'None',
+        allergies: document.getElementById('allergies').value || 'None',
+        currentMedications: document.getElementById('current-medications').value || 'None'
+      };
+      
+      // Save to local storage
+      localStorage.setItem('patientProfile', JSON.stringify(profileData));
+      
+      // Update summary
+      document.getElementById('summary-name').textContent = profileData.name;
+      document.getElementById('summary-age').textContent = profileData.age;
+      document.getElementById('summary-gender').textContent = profileData.gender;
+      document.getElementById('summary-medical-history').textContent = profileData.medicalHistory;
+      document.getElementById('summary-allergies').textContent = profileData.allergies;
+      document.getElementById('summary-current-medications').textContent = profileData.currentMedications;
+      
+      // Show summary with animation, hide form
+      profileFormContainer.classList.add('animate__animated', 'animate__fadeOutUp');
+      setTimeout(() => {
+        profileFormContainer.style.display = 'none';
+        profileFormContainer.classList.remove('animate__animated', 'animate__fadeOutUp');
+        profileSummary.style.display = 'block';
+        profileSummary.classList.add('animate__animated', 'animate__fadeInUp');
+        
+        // Add sequential animations to profile fields
+        document.querySelectorAll('.profile-field').forEach((field, index) => {
+          field.style.animationDelay = `${index * 0.1}s`;
+          field.classList.add('animate__animated', 'animate__fadeInRight');
+        });
+      }, 300);
+      
+      // Send profile to backend
+      fetch('/save_profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
+      }).then(response => {
+        if (response.ok) {
+          // Show success message
+          const successMsg = document.createElement('div');
+          successMsg.className = 'save-success-message';
+          successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Profile saved successfully!';
+          document.querySelector('.profile-sidebar').appendChild(successMsg);
+          
+          // Remove after 3 seconds
+          setTimeout(() => {
+            successMsg.classList.add('fade-out');
+            setTimeout(() => successMsg.remove(), 500);
+          }, 3000);
+        }
+      });
+    });
+    
+    // Edit profile with animation
+    editProfileBtn.addEventListener('click', () => {
+      profileSummary.classList.add('animate__animated', 'animate__fadeOutDown');
+      setTimeout(() => {
+        profileSummary.style.display = 'none';
+        profileSummary.classList.remove('animate__animated', 'animate__fadeOutDown');
+        profileFormContainer.style.display = 'block';
+        profileFormContainer.classList.add('animate__animated', 'animate__fadeInDown');
+      }, 300);
+    });
+    
+    // Load profile if exists with animation
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedProfile = localStorage.getItem('patientProfile');
+      if (savedProfile) {
+        const profileData = JSON.parse(savedProfile);
+        
+        // Fill form
+        document.getElementById('name').value = profileData.name;
+        document.getElementById('age').value = profileData.age;
+        document.getElementById('gender').value = profileData.gender;
+        document.getElementById('medical-history').value = profileData.medicalHistory === 'None' ? '' : profileData.medicalHistory;
+        document.getElementById('allergies').value = profileData.allergies === 'None' ? '' : profileData.allergies;
+        document.getElementById('current-medications').value = profileData.currentMedications === 'None' ? '' : profileData.currentMedications;
+        
+        // Update summary
+        document.getElementById('summary-name').textContent = profileData.name;
+        document.getElementById('summary-age').textContent = profileData.age;
+        document.getElementById('summary-gender').textContent = profileData.gender;
+        document.getElementById('summary-medical-history').textContent = profileData.medicalHistory;
+        document.getElementById('summary-allergies').textContent = profileData.allergies;
+        document.getElementById('summary-current-medications').textContent = profileData.currentMedications;
+        
+        // Show summary, hide form
+        profileFormContainer.style.display = 'none';
+        profileSummary.style.display = 'block';
+      }
+      
+      // Add input focus animations
+      const inputs = document.querySelectorAll('.profile-form input, .profile-form select, .profile-form textarea');
+      inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+          input.parentElement.classList.add('input-focused');
+        });
+        input.addEventListener('blur', () => {
+          if (!input.value) {
+            input.parentElement.classList.remove('input-focused');
+          }
+        });
+        // Check if input has value on load
+        if (input.value) {
+          input.parentElement.classList.add('input-focused');
+        }
+      });
+      
+      // Load initial consultations
+      loadConsultations();
+    });
+
+    // Helper function to send a message as the user
+    function sendMessage(message) {
+      if (!message.trim()) return;
+      
+      // Set input value and submit the form
+      userInput.value = message;
+      chatForm.dispatchEvent(new Event('submit'));
+    }
+    
+    // Function to load consultations
+    function loadConsultations() {
+      fetch('/get_consultations')
+        .then(response => response.json())
+        .then(consultations => {
+          if (consultations && consultations.length > 0) {
+            emptyConsultations.style.display = 'none';
+            consultationsContainer.innerHTML = '';
+            
+            consultations.forEach(c => {
+              const consultationItem = document.createElement('div');
+              consultationItem.className = 'consultation-item animate__animated animate__fadeIn';
+              
+              // Status class
+              const statusClass = c.status === 'Scheduled' ? 'status-scheduled' : 
+                                  c.status === 'Completed' ? 'status-completed' : 'status-cancelled';
+              
+              consultationItem.innerHTML = `
+                <div class="consultation-header">
+                  <div class="consultation-doctor">${c.doctor}</div>
+                  <div class="consultation-status ${statusClass}">${c.status}</div>
+                </div>
+                <div class="consultation-details">
+                  <div class="consultation-detail">
+                    <div class="detail-label">Specialty</div>
+                    <div class="detail-value">${c.specialty}</div>
+                  </div>
+                  <div class="consultation-detail">
+                    <div class="detail-label">Patient</div>
+                    <div class="detail-value">${c.patient}</div>
+                  </div>
+                  <div class="consultation-detail">
+                    <div class="detail-label">Date</div>
+                    <div class="detail-value">${c.date}</div>
+                  </div>
+                  <div class="consultation-detail">
+                    <div class="detail-label">Time</div>
+                    <div class="detail-value">${c.time}</div>
+                  </div>
+                </div>
+                <div class="consultation-actions">
+                  <button class="consultation-action-btn action-reschedule" data-id="${c.id}">
+                    <i class="fas fa-calendar-alt"></i> Reschedule
+                  </button>
+                  <button class="consultation-action-btn action-cancel" data-id="${c.id}">
+                    <i class="fas fa-times-circle"></i> Cancel
+                  </button>
+                </div>
+              `;
+              
+              consultationsContainer.appendChild(consultationItem);
+            });
+            
+            // Prepend the booking form
+            consultationsContainer.insertBefore(bookingForm, consultationsContainer.firstChild);
+            
+            // Add event listeners for action buttons
+            document.querySelectorAll('.action-reschedule').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                sendMessage(`Reschedule consultation #${id}`);
+                profileSidebar.classList.remove('active');
+              });
+            });
+            
+            document.querySelectorAll('.action-cancel').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                sendMessage(`Cancel consultation #${id}`);
+                profileSidebar.classList.remove('active');
+              });
+            });
+          } else {
+            emptyConsultations.style.display = 'block';
+            consultationsContainer.innerHTML = '';
+            // Still prepend the booking form even if no consultations
+            consultationsContainer.prepend(bookingForm);
+          }
+        });
+    }
+    
+    // Function to format message with Markdown and special formatting
+    function formatMessage(message) {
+      // Convert message to HTML using showdown
+      let formattedText = converter.makeHtml(message);
+      
+      // Replace emoji markers like ":emoji:" with actual emoji spans
+      formattedText = formattedText.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+      
+      // Add specific styling for different message types
+      if (formattedText.includes('EMERGENCY ALERT')) {
+        formattedText = `<div class="emergency-alert">${formattedText}</div>`;
+      } else if (formattedText.includes('Health Tips') || formattedText.includes('Seasonal Tip')) {
+        formattedText = `<div class="tips-card">${formattedText}</div>`;
+      } else if (formattedText.includes('Description') && formattedText.includes('Common symptoms')) {
+        formattedText = `<div class="disease-card">${formattedText}</div>`;
+      } else if (formattedText.includes('Consultation Booked') || formattedText.includes('Consultation Rescheduled')) {
+        formattedText = `<div class="consultation-card">${formattedText}</div>`;
+      }
+      
+      return formattedText;
+    }
+
+    // Chat form submission
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userMessage = userInput.value;
+      
+      if (!userMessage.trim()) return;
+      
+      // Display user message
+      addMessage('user', userMessage);
+      
+      // Clear input field
+      userInput.value = '';
+      
+      // Show typing indicator
+      typingIndicator.style.display = 'block';
+      
+      try {
+        // Get patient profile if available
+        const profileData = JSON.parse(localStorage.getItem('patientProfile') || '{}');
+        
+        // Send message to backend with profile data
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: userMessage,
+            profile: profileData
+          })
+        });
+        
+        const data = await response.json();
+        
+        // Hide typing indicator after a small delay to simulate real typing
+        setTimeout(() => {
+          typingIndicator.style.display = 'none';
+          
+          // Display bot response with animation
+          addMessage('bot', data.response);
+          
+          // Scroll to bottom of chat box
+          chatBox.scrollTop = chatBox.scrollHeight;
+          
+          // If the response contains "consultation" or "appointment", refresh consultations
+          if (data.response.toLowerCase().includes('consultation') || 
+              data.response.toLowerCase().includes('appointment')) {
+            loadConsultations();
+          }
+        }, 800 + Math.random() * 1000); // Random delay between 800ms and 1800ms
+      } catch (error) {
+        console.error('Error:', error);
+        typingIndicator.style.display = 'none';
+        addMessage('bot', 'Sorry, there was an error processing your request. Please try again.');
+      }
+    });
+    
+    function addMessage(type, content) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}-message animate__animated animate__fadeInUp`;
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'content formatted-message';
+      
+      // Format the message if it's from the bot
+      if (type === 'bot') {
+        contentDiv.innerHTML = formatMessage(content);
+      } else {
+        contentDiv.textContent = content;
+      }
+      
+      messageDiv.appendChild(contentDiv);
+      chatBox.appendChild(messageDiv);
+      
+      // Scroll to bottom of chat box
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Add dynamic hover effects to profile fields
+    function addHoverEffects() {
+      const fields = document.querySelectorAll('.profile-field');
+      fields.forEach(field => {
+        field.addEventListener('mouseenter', () => {
+          field.classList.add('field-hover');
+        });
+        field.addEventListener('mouseleave', () => {
+          field.classList.remove('field-hover');
+        });
+      });
+    }
+
+    // Call the function when profile is loaded
+    window.addEventListener('DOMContentLoaded', addHoverEffects);
+    
+    // Re-add effects when edit button is clicked
+    editProfileBtn.addEventListener('click', () => {
+      setTimeout(addHoverEffects, 500);
+    });
+  </script>
+</body>
+</html>
