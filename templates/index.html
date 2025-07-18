@@ -3,13 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HealthBot</title>
+  <title>HealthBot - Professional Healthcare Assistant</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <!-- Adding modern icon library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <!-- Add animate.css for more animations -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  <!-- Add Showdown for Markdown parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 </head>
 <body>
@@ -25,11 +21,10 @@
 
     <div class="main-container">
       <main class="chat-container">
-        <div class="welcome-card animate__animated animate__fadeIn">
+        <div class="welcome-card">
           <div class="welcome-icon"><i class="fas fa-robot"></i></div>
           <h2>Welcome to HealthBot!</h2>
-          <p>I can help with medical queries, suggest specialists, provide health tips, and even schedule consultations for you.</p>
-          <div class="welcome-pulse-circle"></div>
+          <p>Your professional healthcare assistant. I can help with medical queries, suggest specialists, provide health tips, and schedule consultations.</p>
         </div>
 
         <div id="chat-box"></div>
@@ -41,8 +36,10 @@
         </div>
         
         <form id="chat-form" autocomplete="off">
-          <input type="text" id="user-input" placeholder="Describe your symptoms or ask for health tips..." required />
-          <button type="submit" id="send-button"><i class="fas fa-paper-plane"></i></button>
+          <input type="text" id="user-input" placeholder="Describe your symptoms or ask for health advice..." required />
+          <button type="submit" id="send-button" aria-label="Send message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
         </form>
         
         <div class="quick-actions" id="quick-actions">
@@ -50,8 +47,8 @@
           <button class="quick-action-btn" data-message="What are the symptoms of diabetes?">About Diabetes</button>
           <button class="quick-action-btn" data-message="I want to book a consultation">Book Consultation</button>
           <button class="quick-action-btn" data-message="My consultations">My Appointments</button>
-          <button class="quick-action-btn" data-message="Tell me about migraine">Migraine Info</button>
-          <button class="quick-action-btn" data-message="I need a skin specialist">Skin Issues</button>
+          <button class="quick-action-btn" data-message="Tell me about heart disease">Heart Health</button>
+          <button class="quick-action-btn" data-message="I need a specialist">Find Specialist</button>
         </div>
       </main>
 
@@ -64,7 +61,7 @@
         
         <div id="profile-tab" class="tab-content active">
           <h2><i class="fas fa-user-md"></i> Patient Profile</h2>
-          <p>Please fill in your details to help us better understand your medical needs.</p>
+          <p>Please provide your details to receive personalized healthcare assistance.</p>
           
           <div id="profile-form-container">
             <form id="profile-form" class="profile-form">
@@ -80,7 +77,7 @@
               
               <div class="input-group">
                 <i class="fas fa-venus-mars input-icon"></i>
-                <select id="gender" required>
+                <select id="gender" required title="Select your gender" aria-label="Gender">
                   <option value="" disabled selected>Select Gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -90,24 +87,24 @@
               
               <div class="input-group">
                 <i class="fas fa-notes-medical input-icon"></i>
-                <input type="text" id="medical-history" placeholder="Medical History (e.g., Diabetes)">
+                <input type="text" id="medical-history" placeholder="Medical History (optional)">
               </div>
               
               <div class="input-group">
                 <i class="fas fa-allergies input-icon"></i>
-                <input type="text" id="allergies" placeholder="Allergies (if any)">
+                <input type="text" id="allergies" placeholder="Known Allergies (optional)">
               </div>
               
               <div class="input-group">
                 <i class="fas fa-pills input-icon"></i>
-                <input type="text" id="current-medications" placeholder="Current Medications">
+                <input type="text" id="current-medications" placeholder="Current Medications (optional)">
               </div>
               
               <button type="submit"><i class="fas fa-save"></i> Save Profile</button>
             </form>
           </div>
           
-          <div id="profile-summary" class="profile-summary" style="display: none;">
+          <div id="profile-summary" class="profile-summary">
             <div class="profile-avatar">
               <i class="fas fa-user-circle"></i>
             </div>
@@ -149,10 +146,9 @@
         
         <div id="consultations-tab" class="tab-content">
           <h2><i class="fas fa-calendar-check"></i> Your Consultations</h2>
-          <p>Manage your scheduled medical appointments here.</p>
+          <p>Manage your scheduled medical appointments.</p>
           
           <div id="consultations-container" class="consultation-list">
-            <!-- Consultations will be loaded here -->
             <div class="empty-consultations" id="empty-consultations">
               <p>You don't have any scheduled consultations.</p>
             </div>
@@ -162,12 +158,12 @@
             <i class="fas fa-plus-circle"></i> Schedule New Consultation
           </button>
 
-          <div id="booking-form" class="profile-form" style="display: none; margin-top: 20px;">
+          <div id="booking-form" class="profile-form booking-form-hidden">
             <h3><i class="fas fa-calendar-plus"></i> Book Appointment</h3>
             
             <div class="input-group">
               <i class="fas fa-user-md input-icon"></i>
-              <select id="specialist-type" required>
+              <select id="specialist-type" required title="Select specialist type" aria-label="Specialist Type">
                 <option value="" disabled selected>Select Specialist</option>
                 <option value="General Physician">General Physician</option>
                 <option value="Cardiologist">Cardiologist</option>
@@ -181,22 +177,22 @@
                 <option value="Psychiatrist">Psychiatrist</option>
                 <option value="ENT Specialist">ENT Specialist</option>
                 <option value="Orthopedic Specialist">Orthopedic Specialist</option>
+                <option value="Urologist">Urologist</option>
               </select>
             </div>
             
             <div class="input-group">
               <i class="fas fa-calendar-day input-icon"></i>
-              <input type="date" id="appointment-date" required>
+              <input type="date" id="appointment-date" required title="Select appointment date" aria-label="Appointment Date">
             </div>
             
             <div class="input-group">
               <i class="fas fa-clock input-icon"></i>
-              <select id="appointment-time" required>
+              <select id="appointment-time" required title="Select appointment time" aria-label="Appointment Time">
                 <option value="" disabled selected>Select Time</option>
                 <option value="09:00 AM">09:00 AM</option>
                 <option value="10:00 AM">10:00 AM</option>
                 <option value="11:00 AM">11:00 AM</option>
-                <option value="12:00 PM">12:00 PM</option>
                 <option value="02:00 PM">02:00 PM</option>
                 <option value="03:00 PM">03:00 PM</option>
                 <option value="04:00 PM">04:00 PM</option>
@@ -210,30 +206,34 @@
             </div>
             
             <div class="booking-buttons">
-              <button type="button" id="confirm-booking" class="confirm-btn"><i class="fas fa-check"></i> Confirm Booking</button>
-              <button type="button" id="cancel-booking" class="cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+              <button type="button" id="confirm-booking" class="confirm-btn">
+                <i class="fas fa-check"></i> Confirm Booking
+              </button>
+              <button type="button" id="cancel-booking" class="cancel-btn">
+                <i class="fas fa-times"></i> Cancel
+              </button>
             </div>
           </div>
         </div>
         
         <div id="health-info-tab" class="tab-content">
           <h2><i class="fas fa-heartbeat"></i> Health Information</h2>
-          <p>Essential health resources and tips for a healthy lifestyle.</p>
+          <p>Essential health resources and medical information.</p>
           
           <div class="tips-card">
-            <h3><i class="fas fa-star"></i> General Health Tips</h3>
+            <h3><i class="fas fa-lightbulb"></i> Daily Health Tips</h3>
             <ul>
-              <li>Stay hydrated by drinking at least 8 glasses of water daily</li>
-              <li>Aim for 7-8 hours of quality sleep each night</li>
-              <li>Exercise for at least 30 minutes most days of the week</li>
-              <li>Maintain a balanced diet rich in fruits and vegetables</li>
-              <li>Practice stress management techniques like meditation</li>
+              <li>Stay hydrated - drink at least 8 glasses of water daily</li>
+              <li>Get 7-8 hours of quality sleep each night</li>
+              <li>Exercise for at least 30 minutes most days</li>
+              <li>Eat a balanced diet rich in fruits and vegetables</li>
+              <li>Practice stress management techniques</li>
             </ul>
           </div>
           
           <div class="disease-card">
-            <h3><i class="fas fa-info-circle"></i> Common Diseases</h3>
-            <p>Ask the HealthBot about:</p>
+            <h3><i class="fas fa-info-circle"></i> Common Health Conditions</h3>
+            <p>Ask HealthBot about these conditions:</p>
             <div class="disease-buttons">
               <button class="disease-btn" data-disease="diabetes">Diabetes</button>
               <button class="disease-btn" data-disease="hypertension">Hypertension</button>
@@ -241,29 +241,29 @@
               <button class="disease-btn" data-disease="arthritis">Arthritis</button>
               <button class="disease-btn" data-disease="depression">Depression</button>
               <button class="disease-btn" data-disease="migraine">Migraine</button>
-              <button class="disease-btn" data-disease="eczema">Eczema</button>
-              <button class="disease-btn" data-disease="gerd">GERD</button>
-              <button class="disease-btn" data-disease="thyroid_disorders">Thyroid</button>
-              <button class="disease-btn" data-disease="glaucoma">Glaucoma</button>
-              <button class="disease-btn" data-disease="osteoporosis">Osteoporosis</button>
-              <button class="disease-btn" data-disease="fibromyalgia">Fibromyalgia</button>
-              <button class="disease-btn" data-disease="multiple_sclerosis">MS</button>
-              <button class="disease-btn" data-disease="celiac_disease">Celiac</button>
+              <button class="disease-btn" data-disease="heart disease">Heart Disease</button>
+              <button class="disease-btn" data-disease="thyroid">Thyroid</button>
             </div>
           </div>
           
           <div class="emergency-alert">
-            <h3><i class="fas fa-exclamation-triangle"></i> Emergency Guidance</h3>
-            <p>For medical emergencies like severe chest pain, difficulty breathing, or stroke symptoms, call emergency services immediately.</p>
+            <h3><i class="fas fa-exclamation-triangle"></i> Emergency Situations</h3>
+            <p><strong>Call emergency services immediately for:</strong></p>
+            <ul>
+              <li>Severe chest pain or pressure</li>
+              <li>Difficulty breathing or shortness of breath</li>
+              <li>Signs of stroke (facial drooping, arm weakness, speech difficulties)</li>
+              <li>Severe allergic reactions</li>
+              <li>Loss of consciousness</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- JavaScript -->
   <script>
-    // Markdown converter
+    // Initialize Markdown converter
     const converter = new showdown.Converter({
       strikethrough: true,
       tables: true,
@@ -283,7 +283,6 @@
     const profileFormContainer = document.getElementById('profile-form-container');
     const profileSummary = document.getElementById('profile-summary');
     const editProfileBtn = document.getElementById('edit-profile');
-    const quickActions = document.getElementById('quick-actions');
     const newConsultationBtn = document.getElementById('new-consultation-btn');
     const consultationsContainer = document.getElementById('consultations-container');
     const emptyConsultations = document.getElementById('empty-consultations');
@@ -294,18 +293,17 @@
     const confirmBookingBtn = document.getElementById('confirm-booking');
     const cancelBookingBtn = document.getElementById('cancel-booking');
     
-    // Set minimum date for appointment booking to today
+    // Set minimum date for appointment booking
     const appointmentDate = document.getElementById('appointment-date');
     if (appointmentDate) {
       const today = new Date();
       const dd = String(today.getDate()).padStart(2, '0');
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const yyyy = today.getFullYear();
-      const minDate = yyyy + '-' + mm + '-' + dd;
-      appointmentDate.min = minDate;
+      appointmentDate.min = `${yyyy}-${mm}-${dd}`;
     }
     
-    // Tab switching
+    // Tab switching functionality
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const tabId = tab.getAttribute('data-tab');
@@ -317,10 +315,15 @@
         // Show active content
         tabContents.forEach(content => content.classList.remove('active'));
         document.getElementById(`${tabId}-tab`).classList.add('active');
+        
+        // Load consultations when switching to consultations tab
+        if (tabId === 'consultations') {
+          loadConsultations();
+        }
       });
     });
     
-    // Disease buttons
+    // Disease button functionality
     diseaseButtons.forEach(button => {
       button.addEventListener('click', () => {
         const disease = button.getAttribute('data-disease');
@@ -337,18 +340,24 @@
       });
     });
     
+    // Profile toggle
+    profileToggle.addEventListener('click', () => {
+      profileSidebar.classList.toggle('active');
+      if (profileSidebar.classList.contains('active')) {
+        loadConsultations();
+      }
+    });
+    
     // New consultation button
     newConsultationBtn.addEventListener('click', () => {
-      // Toggle booking form
-      if (bookingForm.style.display === 'none') {
+      if (bookingForm.style.display === 'none' || !bookingForm.style.display) {
         bookingForm.style.display = 'block';
-        bookingForm.classList.add('animate__animated', 'animate__fadeIn');
       } else {
         bookingForm.style.display = 'none';
       }
     });
     
-    // Confirm booking button
+    // Booking form functionality
     confirmBookingBtn.addEventListener('click', () => {
       const specialistType = document.getElementById('specialist-type').value;
       const date = document.getElementById('appointment-date').value;
@@ -367,44 +376,21 @@
         day: 'numeric'
       });
       
-      // Send the booking details to backend via chat
       const bookingMessage = `I want to book a consultation with a ${specialistType} on ${formattedDate} at ${time}${reason ? ' for ' + reason : ''}`;
       sendMessage(bookingMessage);
       
-      // Hide the booking form
       bookingForm.style.display = 'none';
-      
-      // Hide the sidebar
       profileSidebar.classList.remove('active');
     });
     
-    // Cancel booking button
     cancelBookingBtn.addEventListener('click', () => {
       bookingForm.style.display = 'none';
     });
     
-    // Profile toggle with animation
-    profileToggle.addEventListener('click', () => {
-      profileSidebar.classList.toggle('active');
-      
-      // Add animation class for profile elements
-      if (profileSidebar.classList.contains('active')) {
-        loadConsultations();
-        
-        setTimeout(() => {
-          document.querySelectorAll('.profile-field').forEach((field, index) => {
-            field.style.animationDelay = `${index * 0.1}s`;
-            field.classList.add('animate__animated', 'animate__fadeInRight');
-          });
-        }, 300);
-      }
-    });
-    
-    // Save profile with animation
+    // Profile form submission
     profileForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      // Get form values
       const profileData = {
         name: document.getElementById('name').value,
         age: document.getElementById('age').value,
@@ -414,94 +400,56 @@
         currentMedications: document.getElementById('current-medications').value || 'None'
       };
       
-      // Save to local storage
+      // Save to localStorage
       localStorage.setItem('patientProfile', JSON.stringify(profileData));
       
       // Update summary
-      document.getElementById('summary-name').textContent = profileData.name;
-      document.getElementById('summary-age').textContent = profileData.age;
-      document.getElementById('summary-gender').textContent = profileData.gender;
-      document.getElementById('summary-medical-history').textContent = profileData.medicalHistory;
-      document.getElementById('summary-allergies').textContent = profileData.allergies;
-      document.getElementById('summary-current-medications').textContent = profileData.currentMedications;
+      updateProfileSummary(profileData);
       
-      // Show summary with animation, hide form
-      profileFormContainer.classList.add('animate__animated', 'animate__fadeOutUp');
-      setTimeout(() => {
-        profileFormContainer.style.display = 'none';
-        profileFormContainer.classList.remove('animate__animated', 'animate__fadeOutUp');
-        profileSummary.style.display = 'block';
-        profileSummary.classList.add('animate__animated', 'animate__fadeInUp');
-        
-        // Add sequential animations to profile fields
-        document.querySelectorAll('.profile-field').forEach((field, index) => {
-          field.style.animationDelay = `${index * 0.1}s`;
-          field.classList.add('animate__animated', 'animate__fadeInRight');
-        });
-      }, 300);
+      // Show summary, hide form
+      profileFormContainer.style.display = 'none';
+      profileSummary.classList.add('active');
       
-      // Send profile to backend
+      // Send to backend
       fetch('/save_profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profileData)
       }).then(response => {
         if (response.ok) {
-          // Show success message
-          const successMsg = document.createElement('div');
-          successMsg.className = 'save-success-message';
-          successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Profile saved successfully!';
-          document.querySelector('.profile-sidebar').appendChild(successMsg);
-          
-          // Remove after 3 seconds
-          setTimeout(() => {
-            successMsg.classList.add('fade-out');
-            setTimeout(() => successMsg.remove(), 500);
-          }, 3000);
+          showSuccessMessage('Profile saved successfully!');
         }
       });
     });
     
-    // Edit profile with animation
+    // Edit profile button
     editProfileBtn.addEventListener('click', () => {
-      profileSummary.classList.add('animate__animated', 'animate__fadeOutDown');
-      setTimeout(() => {
-        profileSummary.style.display = 'none';
-        profileSummary.classList.remove('animate__animated', 'animate__fadeOutDown');
-        profileFormContainer.style.display = 'block';
-        profileFormContainer.classList.add('animate__animated', 'animate__fadeInDown');
-      }, 300);
+      profileSummary.classList.remove('active');
+      profileFormContainer.style.display = 'block';
     });
     
-    // Load profile if exists with animation
+    // Load profile on page load
     window.addEventListener('DOMContentLoaded', () => {
       const savedProfile = localStorage.getItem('patientProfile');
       if (savedProfile) {
         const profileData = JSON.parse(savedProfile);
         
         // Fill form
-        document.getElementById('name').value = profileData.name;
-        document.getElementById('age').value = profileData.age;
-        document.getElementById('gender').value = profileData.gender;
+        document.getElementById('name').value = profileData.name || '';
+        document.getElementById('age').value = profileData.age || '';
+        document.getElementById('gender').value = profileData.gender || '';
         document.getElementById('medical-history').value = profileData.medicalHistory === 'None' ? '' : profileData.medicalHistory;
         document.getElementById('allergies').value = profileData.allergies === 'None' ? '' : profileData.allergies;
         document.getElementById('current-medications').value = profileData.currentMedications === 'None' ? '' : profileData.currentMedications;
         
-        // Update summary
-        document.getElementById('summary-name').textContent = profileData.name;
-        document.getElementById('summary-age').textContent = profileData.age;
-        document.getElementById('summary-gender').textContent = profileData.gender;
-        document.getElementById('summary-medical-history').textContent = profileData.medicalHistory;
-        document.getElementById('summary-allergies').textContent = profileData.allergies;
-        document.getElementById('summary-current-medications').textContent = profileData.currentMedications;
-        
-        // Show summary, hide form
+        // Update summary and show it
+        updateProfileSummary(profileData);
         profileFormContainer.style.display = 'none';
-        profileSummary.style.display = 'block';
+        profileSummary.classList.add('active');
       }
       
-      // Add input focus animations
-      const inputs = document.querySelectorAll('.profile-form input, .profile-form select, .profile-form textarea');
+      // Add input focus effects
+      const inputs = document.querySelectorAll('.input-group input, .input-group select, .input-group textarea');
       inputs.forEach(input => {
         input.addEventListener('focus', () => {
           input.parentElement.classList.add('input-focused');
@@ -511,26 +459,30 @@
             input.parentElement.classList.remove('input-focused');
           }
         });
-        // Check if input has value on load
         if (input.value) {
           input.parentElement.classList.add('input-focused');
         }
       });
       
-      // Load initial consultations
       loadConsultations();
     });
-
-    // Helper function to send a message as the user
+    
+    // Helper functions
     function sendMessage(message) {
       if (!message.trim()) return;
-      
-      // Set input value and submit the form
       userInput.value = message;
       chatForm.dispatchEvent(new Event('submit'));
     }
     
-    // Function to load consultations
+    function updateProfileSummary(profileData) {
+      document.getElementById('summary-name').textContent = profileData.name || 'Not provided';
+      document.getElementById('summary-age').textContent = profileData.age || 'Not provided';
+      document.getElementById('summary-gender').textContent = profileData.gender || 'Not provided';
+      document.getElementById('summary-medical-history').textContent = profileData.medicalHistory || 'None';
+      document.getElementById('summary-allergies').textContent = profileData.allergies || 'None';
+      document.getElementById('summary-current-medications').textContent = profileData.currentMedications || 'None';
+    }
+    
     function loadConsultations() {
       fetch('/get_consultations')
         .then(response => response.json())
@@ -541,9 +493,8 @@
             
             consultations.forEach(c => {
               const consultationItem = document.createElement('div');
-              consultationItem.className = 'consultation-item animate__animated animate__fadeIn';
+              consultationItem.className = 'consultation-item';
               
-              // Status class
               const statusClass = c.status === 'Scheduled' ? 'status-scheduled' : 
                                   c.status === 'Completed' ? 'status-completed' : 'status-cancelled';
               
@@ -583,8 +534,7 @@
               consultationsContainer.appendChild(consultationItem);
             });
             
-            // Prepend the booking form
-            consultationsContainer.insertBefore(bookingForm, consultationsContainer.firstChild);
+            consultationsContainer.appendChild(bookingForm);
             
             // Add event listeners for action buttons
             document.querySelectorAll('.action-reschedule').forEach(btn => {
@@ -605,26 +555,20 @@
           } else {
             emptyConsultations.style.display = 'block';
             consultationsContainer.innerHTML = '';
-            // Still prepend the booking form even if no consultations
-            consultationsContainer.prepend(bookingForm);
+            consultationsContainer.appendChild(bookingForm);
           }
         });
     }
     
-    // Function to format message with Markdown and special formatting
     function formatMessage(message) {
-      // Convert message to HTML using showdown
       let formattedText = converter.makeHtml(message);
-      
-      // Replace emoji markers like ":emoji:" with actual emoji spans
-      formattedText = formattedText.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
       
       // Add specific styling for different message types
       if (formattedText.includes('EMERGENCY ALERT')) {
         formattedText = `<div class="emergency-alert">${formattedText}</div>`;
-      } else if (formattedText.includes('Health Tips') || formattedText.includes('Seasonal Tip')) {
+      } else if (formattedText.includes('Health Tips') || formattedText.includes('tips')) {
         formattedText = `<div class="tips-card">${formattedText}</div>`;
-      } else if (formattedText.includes('Description') && formattedText.includes('Common symptoms')) {
+      } else if (formattedText.includes('Description') && formattedText.includes('symptoms')) {
         formattedText = `<div class="disease-card">${formattedText}</div>`;
       } else if (formattedText.includes('Consultation Booked') || formattedText.includes('Consultation Rescheduled')) {
         formattedText = `<div class="consultation-card">${formattedText}</div>`;
@@ -632,28 +576,58 @@
       
       return formattedText;
     }
-
+    
+    function addMessage(type, content) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}-message`;
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'content formatted-message';
+      
+      if (type === 'bot') {
+        contentDiv.innerHTML = formatMessage(content);
+      } else {
+        contentDiv.textContent = content;
+      }
+      
+      messageDiv.appendChild(contentDiv);
+      chatBox.appendChild(messageDiv);
+      
+      // Scroll to bottom
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    function showSuccessMessage(message) {
+      const successMsg = document.createElement('div');
+      successMsg.className = 'save-success-message';
+      successMsg.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+      document.body.appendChild(successMsg);
+      
+      setTimeout(() => {
+        successMsg.classList.add('fade-out');
+        setTimeout(() => successMsg.remove(), 300);
+      }, 3000);
+    }
+    
     // Chat form submission
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const userMessage = userInput.value;
+      const userMessage = userInput.value.trim();
       
-      if (!userMessage.trim()) return;
+      if (!userMessage) return;
       
       // Display user message
       addMessage('user', userMessage);
       
-      // Clear input field
+      // Clear input
       userInput.value = '';
       
       // Show typing indicator
       typingIndicator.style.display = 'block';
       
       try {
-        // Get patient profile if available
         const profileData = JSON.parse(localStorage.getItem('patientProfile') || '{}');
         
-        // Send message to backend with profile data
         const response = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -665,69 +639,22 @@
         
         const data = await response.json();
         
-        // Hide typing indicator after a small delay to simulate real typing
+        // Hide typing indicator and show response
         setTimeout(() => {
           typingIndicator.style.display = 'none';
-          
-          // Display bot response with animation
           addMessage('bot', data.response);
           
-          // Scroll to bottom of chat box
-          chatBox.scrollTop = chatBox.scrollHeight;
-          
-          // If the response contains "consultation" or "appointment", refresh consultations
+          // Refresh consultations if needed
           if (data.response.toLowerCase().includes('consultation') || 
               data.response.toLowerCase().includes('appointment')) {
             loadConsultations();
           }
-        }, 800 + Math.random() * 1000); // Random delay between 800ms and 1800ms
+        }, 500 + Math.random() * 1000);
       } catch (error) {
         console.error('Error:', error);
         typingIndicator.style.display = 'none';
-        addMessage('bot', 'Sorry, there was an error processing your request. Please try again.');
+        addMessage('bot', 'I apologize, but I encountered an error. Please try again.');
       }
-    });
-    
-    function addMessage(type, content) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type}-message animate__animated animate__fadeInUp`;
-      
-      const contentDiv = document.createElement('div');
-      contentDiv.className = 'content formatted-message';
-      
-      // Format the message if it's from the bot
-      if (type === 'bot') {
-        contentDiv.innerHTML = formatMessage(content);
-      } else {
-        contentDiv.textContent = content;
-      }
-      
-      messageDiv.appendChild(contentDiv);
-      chatBox.appendChild(messageDiv);
-      
-      // Scroll to bottom of chat box
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Add dynamic hover effects to profile fields
-    function addHoverEffects() {
-      const fields = document.querySelectorAll('.profile-field');
-      fields.forEach(field => {
-        field.addEventListener('mouseenter', () => {
-          field.classList.add('field-hover');
-        });
-        field.addEventListener('mouseleave', () => {
-          field.classList.remove('field-hover');
-        });
-      });
-    }
-
-    // Call the function when profile is loaded
-    window.addEventListener('DOMContentLoaded', addHoverEffects);
-    
-    // Re-add effects when edit button is clicked
-    editProfileBtn.addEventListener('click', () => {
-      setTimeout(addHoverEffects, 500);
     });
   </script>
 </body>
